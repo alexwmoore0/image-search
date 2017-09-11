@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <meta charset="UTF-8"></meta>
+    <title>Alex's Image Search</title>
+</head>
+<body>
+
+    <h1>Alex's Cool Image Search</h1>
+    <div>
+        <h2>Search here: </h2>
+        <input oninput="searchChange(this.value)"></input>
+        <div id="results">
+
+        </div>
+    </div>
+
+
+    <script>
+        function searchChange(value) {
+            if (!value) {
+                return;
+            }
+            $.ajax({
+                url: '/api/v1/images?concept=' + value,
+                success: function(result) {
+                    result = result || [];
+                    const images = result.map(result => {
+                        const i = document.createElement('img');
+                        i.src = result.imageUrl;
+                        i.async = true;
+                        i.style = 'width:304px; height:228px;';
+
+                        const d2 = document.createElement('div');
+                        d2.innerHTML = `Concept: ${result.concept} - Probability: ${result.matchPercent}`;
+
+                        const d = document.createElement('div');
+                        d.appendChild(i);
+                        d.appendChild(d2);
+
+                        return d;
+                    });
+
+                    $("#results").html(images);
+                }
+            })
+        }
+    </script>
+</body>
+</html>
