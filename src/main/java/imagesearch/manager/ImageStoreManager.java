@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ImageStoreManager {
@@ -27,55 +28,35 @@ public class ImageStoreManager {
         System.out.println("\nStarting classification...\n");
 
         imageFileManager.getImageUrls().parallelStream().limit(IMAGE_COUNT).forEach(imageUrl -> {
-            List<ClarifaiOutput<Concept>> outputs = getOutput(imageUrl);
+            List<ClarifaiOutput<Concept>> predictions = predictImage(imageUrl);
 
-            outputs.forEach(output ->
-                    output.data().forEach(concept -> {
-                        ImageResult imageResult = new ImageResult(imageUrl, concept.value(), concept.name());
-                        System.out.print(concept.name() + ", ");
+            predictions.forEach(prediction -> {
+                // make sure input is not null before getting ID
+                String imageId = Optional.ofNullable(prediction.input()).map(ClarifaiInput::id)
+                        .orElse(imageUrl);
+
+                prediction.data().forEach(concept -> {
+                    Optional<String> conceptNameOpt = Optional.ofNullable(concept.name());
+
+                    // ensure concept name is not null
+                    conceptNameOpt.ifPresent(conceptName -> {
+                        String nameLower = conceptName.toLowerCase();
+                        ImageResult imageResult = new ImageResult(imageId, concept.value(), nameLower);
+                        System.out.print(nameLower + ",");
                         imageStoreDao.put(imageResult);
-                    })
-            );
+                    });
+                });
+            });
         });
 
-        System.out.println("\n\nFinished classification!\n\n");
+        System.out.println("\n\nFinished classification!");
     }
 
-
-//        int pageCount = 0;
-//
-//        List<Set<ClarifaiInput>> inputPages = Lists.newArrayList();
-//        inputPages.add(Sets.newHashSet());
-//
-//        for (String imageUrl : imageFileManager.getImageUrls()) {
-//            Set<ClarifaiInput> currentPage = inputPages.get(pageCount);
-//
-//            if (currentPage.size() >= MAX_INPUT) {
-//                pageCount++;
-//                inputPages.add(Sets.newHashSet());
-//                currentPage = inputPages.get(pageCount);
-//            }
-//
-//            currentPage.add(ClarifaiInput.forImage(imageUrl));
-//        }
-//
-//        for (Set<ClarifaiInput> inputPage : inputPages) {
-//            System.out.println(inputPage.size());
-//            List<ClarifaiOutput<Concept>> outputs = getOutputs(inputPage);
-//            outputs.forEach(output -> {
-//                System.out.println(output.input().metadata());
-//                output.data().forEach(concept -> {
-//                    System.out.print(concept.name() + ", ");
-//                   // imageStoreDao.put(concept.name(),));
-//                });
-//            });
-//        }
-
-    private List<ClarifaiOutput<Concept>> getOutput(String imageUrl) {
+    private List<ClarifaiOutput<Concept>> predictImage(String imageUrl) {
         System.out.println("\nCalling Clarifai API for " + imageUrl);
         return clarifaiClient.getDefaultModels().generalModel()
                 .predict()
-                .withInputs(ClarifaiInput.forImage(imageUrl))
+                .withInputs(ClarifaiInput.forImage(imageUrl).withID(imageUrl)) // set ID to imageUrl
                 .executeSync()
                 .getOrThrow(new RuntimeException("Failed to predict image for " + imageUrl));
     }

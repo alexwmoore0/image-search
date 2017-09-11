@@ -21,6 +21,6 @@ public class ImageResult {
     }
 
     public String getConcept() {
-        return this.concept;
+        return concept;
     }
 }

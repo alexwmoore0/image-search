@@ -25,11 +25,18 @@ public class ImageStoreDao {
 
     public Set<ImageResult> search(String query) {
         Set<String> matchingKeys = imagesByConcept.keySet().stream()
-                .filter(key -> key.startsWith(query))
+                .filter(key -> key.contains(query))
                 .collect(toSet());
 
         return matchingKeys.parallelStream().map(imagesByConcept::get)
                 .flatMap(Set::stream)
+                .collect(toSet());
+    }
+
+    public Set<String> getAllImages() {
+        return imagesByConcept.values().stream()
+                .flatMap(Set::stream)
+                .map(ImageResult::getImageUrl)
                 .collect(toSet());
     }
 }

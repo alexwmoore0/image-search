@@ -14,17 +14,15 @@ public class ImageStoreCache {
 
     @Autowired private ImageStoreDao imageStoreDao;
 
-    private Map<String, Set<ImageResult>> imagesByQuery = Maps.newConcurrentMap();
+    private Map<String, Set<ImageResult>> imageCache = Maps.newHashMap();
 
     public Set<ImageResult> getImages(String query) {
-        if (imagesByQuery.containsKey(query)) {
-            System.out.println("Cache hit: " + query);
-            return imagesByQuery.get(query);
+        if (imageCache.containsKey(query)) {
+            return imageCache.get(query);
         }
 
-        System.out.println("Cache miss: " + query);
-        Set<ImageResult> matchingImages = imageStoreDao.search(query);
-        imagesByQuery.put(query, matchingImages);
-        return matchingImages;
+        Set<ImageResult> results = imageStoreDao.search(query);
+        imageCache.put(query, results);
+        return results;
     }
 }
