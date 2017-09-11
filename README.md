@@ -7,8 +7,11 @@ The project runs with Java 8.
 You can build the jar with `./gradlew build`, then run with `java -jar build/libs/image-search.jar`,
 or just `./gradlew bootRun` to build and run in one step.
 
-If my hard-coded Clarifai API Key stops working (runs out of operations), you can also add `-DclarifaiApiKey=your_key_here`
-before the jar path, or after `bootRun`, eg: `java -jar -DclarifaiApiKey=c42caf2cf86c4c498ffce7f2a7545af2 build/libs/image-search.jar`
+If my hard-coded Clarifai API Key stops working (runs out of operations), you can also add
+
+`-DclarifaiApiKey=your_key_here`
+
+before the jar path, or after `bootRun`
 
 This will start the server on port `8080`.
 
