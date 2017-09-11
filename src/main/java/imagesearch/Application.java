@@ -19,7 +19,7 @@ public class Application {
     @Bean
     public ClarifaiClient clarifaiClient() {
         String apiKey = Optional.ofNullable(System.getProperty("clarifaiApiKey"))
-                .orElse(""); // my API key
+                .orElseThrow(() -> new RuntimeException("Must specify Clarifai API Key using -DclarifaiApiKey=your_key_here"));
 
         System.out.println("Using Clarifai API Key: " + apiKey);
 

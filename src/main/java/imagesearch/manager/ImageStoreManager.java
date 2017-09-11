@@ -20,20 +20,10 @@ public class ImageStoreManager {
     @Autowired private ImageStoreDao imageStoreDao;
 
     // useful for debugging when you don't want to start up and read all 1000 images
-    private static final int IMAGE_COUNT = 10;
+    private static final int IMAGE_COUNT = 1000;
 
     @PostConstruct
     public void startClassification() {
-        boolean skipClassify = Boolean.parseBoolean(System.getProperty("skipClassify"));
-
-        if (skipClassify) {
-
-        } else {
-            classify();
-        }
-    }
-
-    private void classify() {
         System.out.println("\nStarting classification...\n");
 
         imageFileManager.getImageUrls().parallelStream().limit(IMAGE_COUNT).forEach(imageUrl -> {
@@ -49,6 +39,8 @@ public class ImageStoreManager {
         });
 
         System.out.println("\n\nFinished classification!\n\n");
+    }
+
 
 //        int pageCount = 0;
 //
@@ -78,9 +70,6 @@ public class ImageStoreManager {
 //                });
 //            });
 //        }
-    }
-
-
 
     private List<ClarifaiOutput<Concept>> getOutput(String imageUrl) {
         System.out.println("\nCalling Clarifai API for " + imageUrl);
