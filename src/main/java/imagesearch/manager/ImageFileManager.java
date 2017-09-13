@@ -26,8 +26,6 @@ public class ImageFileManager {
             br.lines().forEach(imageUrls::add);
 
             System.out.println(String.format("Added %d images", imageUrls.size()));
-
-            // try-with-resource closes reader automatically
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse file " + IMAGE_FILE);
         }
